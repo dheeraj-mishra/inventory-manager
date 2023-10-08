@@ -13,10 +13,11 @@ root = Tk()
 # root.configure(bg="teal")
 # root.iconbitmap(default='favicon.ico')
 root.title("INVENTORY MANAGER")
-root.geometry("900x500")
+#root.geometry("1900x600")
 
 redFill = PatternFill(start_color='ff6666', end_color='ff6666', fill_type='solid')
 greenFill = PatternFill(start_color='5cd65c', end_color='5cd65c', fill_type='solid')
+yellowFill = PatternFill(start_color='FDDA0D', end_color='FDDA0D', fill_type='solid')
 sheets = []
 files = []
 for filename in glob.glob('*.xlsx'):
@@ -37,7 +38,7 @@ def sheet_create():
     if dd_create_sheet.get() != 'Export':
         filename_for_sheet = dd_create_sheet.get() + '.xlsx'
         wb_temp = load_workbook(filename_for_sheet)
-        opBal_temp = int(entry_opBal.get())
+        opBal_temp = float(entry_opBal.get())
         sheet_list = wb_temp.sheetnames
         alreadyPresent = entry_sheet.get() in sheet_list
         if entry_sheet.get() != '' and dd_create_sheet.get() != '':
@@ -54,8 +55,8 @@ def sheet_create():
             sheet_temp[cell_temp].value = column_headers[i]
             sheet_temp[cell_temp].alignment = Alignment(horizontal='center')
         sheet_temp['B2'] = opBal_temp
-        sheet_temp['C2'] = 0
-        sheet_temp['D2'] = 0
+        sheet_temp['C2'] = 0.0
+        sheet_temp['D2'] = 0.0
         sheet_temp['E2'] = opBal_temp
         sheet_temp['A2'] = datetime.now().strftime("%d.%m.%Y")
         wb_temp.save(filename_for_sheet)
@@ -97,8 +98,8 @@ def import_item():
     else:
         remarks = import_remarks.get()
     last_close_value = import_sheet_temp['E' + str(last_row)].value
-    import_column_values = [datetime.now().strftime("%d.%m.%Y"), last_close_value, int(import_quantity.get()), 0,
-                            int(import_quantity.get()) + int(last_close_value), remarks]
+    import_column_values = [datetime.now().strftime("%d.%m.%Y"), last_close_value, float(import_quantity.get()), 0,
+                            float(import_quantity.get()) + float(last_close_value), remarks]
     for i in range(6):
         import_cell_temp = column_names[i] + str(last_row + 1)
         import_sheet_temp[import_cell_temp].value = import_column_values[i]
@@ -114,8 +115,8 @@ def export_item(expo_title, expo_file, expo_sheet, expo_quantity):
     last_row = export_sheet_temp.max_row
     remarks = expo_title
     last_close_value = export_sheet_temp['E' + str(last_row)].value
-    export_column_values = [datetime.now().strftime("%d.%m.%Y"), last_close_value, 0, int(expo_quantity),
-                            int(last_close_value) - int(expo_quantity), remarks]
+    export_column_values = [datetime.now().strftime("%d.%m.%Y"), last_close_value, 0, float(expo_quantity),
+                            float(last_close_value) - float(expo_quantity), remarks]
     for i in range(6):
         export_cell_temp = column_names[i] + str(last_row + 1)
         export_sheet_temp[export_cell_temp].value = export_column_values[i]
@@ -131,40 +132,47 @@ def export_edit():
     export_columns = ['A', 'B', 'C', 'D']
     export_last_row = export_sheet_temp.max_row
     start_row = export_last_row + 2
+    export_sheet_temp['A' + str(start_row)].fill = yellowFill
     export_sheet_temp['A' + str(start_row)].value = datetime.now().strftime("%d.%m.%Y")
+    export_sheet_temp['B' + str(start_row)].fill = yellowFill
     export_sheet_temp['B' + str(start_row)].value = export_title.get()
-
-    export_sheet_temp['C' + str(start_row)].value = export_sheet1.get()
-    export_sheet_temp['C' + str(start_row + 1)].value = export_sheet2.get()
-    export_sheet_temp['C' + str(start_row + 2)].value = export_sheet3.get()
-    export_sheet_temp['C' + str(start_row + 3)].value = export_sheet4.get()
-    export_sheet_temp['C' + str(start_row + 4)].value = export_sheet5.get()
+    export_total_line_counter = 0
 
     if export_quantity1.get() != '' and export_quantity1.get() != 'Quantity':
-        export_sheet_temp['D' + str(start_row)].value = int(export_quantity1.get())
-        export_total_list.append(int(export_quantity1.get()))
+        export_total_line_counter += 1
+        export_sheet_temp['C' + str(start_row)].value = export_sheet1.get()
+        export_sheet_temp['D' + str(start_row)].value = float(export_quantity1.get())
+        export_total_list.append(float(export_quantity1.get()))
         export_item(export_title.get(), export_file1.get(), export_sheet1.get(), export_quantity1.get())
     if export_quantity2.get() != '' and export_quantity2.get() != 'Quantity':
-        export_sheet_temp['D' + str(start_row + 1)].value = int(export_quantity2.get())
-        export_total_list.append(int(export_quantity2.get()))
+        export_total_line_counter += 1
+        export_sheet_temp['D' + str(start_row + 1)].value = float(export_quantity2.get())
+        export_sheet_temp['C' + str(start_row + 1)].value = export_sheet2.get()
+        export_total_list.append(float(export_quantity2.get()))
         export_item(export_title.get(), export_file2.get(), export_sheet2.get(), export_quantity2.get())
     if export_quantity3.get() != '' and export_quantity3.get() != 'Quantity':
-        export_sheet_temp['D' + str(start_row + 2)].value = int(export_quantity3.get())
-        export_total_list.append(int(export_quantity3.get()))
+        export_total_line_counter += 1
+        export_sheet_temp['D' + str(start_row + 2)].value = float(export_quantity3.get())
+        export_sheet_temp['C' + str(start_row + 2)].value = export_sheet3.get()
+        export_total_list.append(float(export_quantity3.get()))
         export_item(export_title.get(), export_file3.get(), export_sheet3.get(), export_quantity3.get())
     if export_quantity4.get() != '' and export_quantity4.get() != 'Quantity':
-        export_sheet_temp['D' + str(start_row + 3)].value = int(export_quantity4.get())
-        export_total_list.append(int(export_quantity4.get()))
+        export_total_line_counter += 1
+        export_sheet_temp['D' + str(start_row + 3)].value = float(export_quantity4.get())
+        export_sheet_temp['C' + str(start_row + 3)].value = export_sheet4.get()
+        export_total_list.append(float(export_quantity4.get()))
         export_item(export_title.get(), export_file4.get(), export_sheet4.get(), export_quantity4.get())
     if export_quantity5.get() != '' and export_quantity5.get() != 'Quantity':
-        export_sheet_temp['D' + str(start_row + 4)].value = int(export_quantity5.get())
-        export_total_list.append(int(export_quantity5.get()))
+        export_total_line_counter += 1
+        export_sheet_temp['D' + str(start_row + 4)].value = float(export_quantity5.get())
+        export_sheet_temp['C' + str(start_row + 4)].value = export_sheet5.get()
+        export_total_list.append(float(export_quantity5.get()))
         export_item(export_title.get(), export_file5.get(), export_sheet5.get(), export_quantity5.get())
 
     export_quantity_total = sum(export_total_list)
 
-    export_sheet_temp['B' + str(start_row + 5)].value = "TOTAL"
-    export_sheet_temp['D' + str(start_row + 5)].value = export_quantity_total
+    export_sheet_temp['B' + str(start_row + export_total_line_counter)].value = "TOTAL"
+    export_sheet_temp['D' + str(start_row + export_total_line_counter)].value = export_quantity_total
     export_file_temp.save(filename='Export.xlsx')
 
 
